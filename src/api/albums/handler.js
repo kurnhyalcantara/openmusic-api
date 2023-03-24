@@ -1,8 +1,9 @@
 const ClientError = require('../../exceptions/ClientError');
 
 class AlbumHandler {
-  constructor(services) {
+  constructor(services, validator) {
     this._services = services;
+    this._validator = validator;
     this.postAlbumHandler = this.postAlbumHandler.bind(this);
     this.getAlbumsHandler = this.getAlbumsHandler.bind(this);
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
@@ -12,6 +13,7 @@ class AlbumHandler {
 
   async postAlbumHandler(req, h) {
     try {
+      this._validator.validateAlbumPayload(req.payload);
       const { name, year } = req.payload;
       const albumId = await this._services.addAlbum({ name, year });
       return h
@@ -55,12 +57,12 @@ class AlbumHandler {
     try {
       const { id } = req.params;
       const album = await this._services.getAlbumById(id);
-      return h.response({
+      return {
         status: 'success',
         data: {
           album: album,
         },
-      });
+      };
     } catch (error) {
       if (error instanceof ClientError) {
         return h
@@ -81,12 +83,13 @@ class AlbumHandler {
 
   async putAlbumByIdHandler(req, h) {
     try {
+      this._validator.validateAlbumPayload(req.payload);
       const { id } = req.params;
       await this._services.editAlbumById(id, req.payload);
-      return h.response({
+      return {
         status: 'success',
         message: 'Album berhasil diperbarui',
-      });
+      };
     } catch (error) {
       if (error instanceof ClientError) {
         return h
