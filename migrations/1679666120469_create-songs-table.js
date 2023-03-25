@@ -14,13 +14,13 @@ exports.up = (pgm) => {
     },
     year: {
       type: 'INTEGER',
-      noteNull: true,
-    },
-    performer: {
-      type: 'TEXT',
       notNull: true,
     },
     genre: {
+      type: 'TEXT',
+      notNull: true,
+    },
+    performer: {
       type: 'TEXT',
       notNull: true,
     },
@@ -41,4 +41,6 @@ exports.up = (pgm) => {
   });
 };
 
-exports.down = (pgm) => {};
+exports.down = (pgm) => {
+  pgm.dropTable('songs');
+};

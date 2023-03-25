@@ -17,12 +17,12 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^8.36.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-prettier-config": "^1.0.1"
+    "eslint-config-google": "^0.14.0"
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.0",
     "dotenv": "^16.0.3",
+    "eslint-config-prettier": "^8.8.0",
     "joi": "^17.9.1",
     "nanoid": "^3.1.20",
     "node-pg-migrate": "^6.2.2",
