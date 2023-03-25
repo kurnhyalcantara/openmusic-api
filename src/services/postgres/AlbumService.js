@@ -45,11 +45,11 @@ class AlbumService {
 
     const songsInAlbum = await this._pool.query(querySongInAlbum);
 
-    const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    const album = await this._pool.query(query);
+    if (!album.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
     }
-    const mapAlbum = result.rows.map(mapAlbumToDBModel)[0];
+    const mapAlbum = album.rows.map(mapAlbumToDBModel)[0];
 
     return {
       ...mapAlbum,

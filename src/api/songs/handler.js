@@ -33,8 +33,32 @@ class SongHandler {
       .code(201);
   }
 
-  async getSongsHandler() {
-    const songs = await this._services.getSongs();
+  async getSongsHandler(req) {
+    const { title, performer } = req.query;
+    let songs = await this._services.getSongs();
+    if (title) {
+      const titleSearch = await songs.filter((song) =>
+        Object.values(song).some((value) =>
+          value
+            .toString()
+            .toLowerCase()
+            .includes(title.toLowerCase())
+        )
+      );
+      songs = titleSearch;
+    }
+    if (performer) {
+      const performerSearch = await songs.filter((song) =>
+        Object.values(song).some((value) =>
+          value
+            .toString()
+            .toLowerCase()
+            .includes(performer.toLowerCase())
+        )
+      );
+      songs = performerSearch;
+    }
+
     return {
       status: 'success',
       data: {
