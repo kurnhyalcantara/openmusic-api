@@ -14,7 +14,7 @@ exports.up = (pgm) => {
     },
     year: {
       type: 'INTEGER',
-      noteNull: true,
+      notNull: true,
     },
     performer: {
       type: 'TEXT',
@@ -41,4 +41,6 @@ exports.up = (pgm) => {
   });
 };
 
-exports.down = (pgm) => {};
+exports.down = (pgm) => {
+  pgm.dropTable('songs');
+};
