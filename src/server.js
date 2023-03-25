@@ -2,6 +2,7 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const albums = require('./api/albums');
 const songs = require('./api/songs');
+const ClientError = require('./exceptions/ClientError');
 const AlbumService = require('./services/postgres/AlbumService');
 const SongService = require('./services/postgres/SongService');
 const AlbumValidator = require('./validator/albums');
@@ -34,6 +35,32 @@ const init = async () => {
       service: songService,
       validator: SongValidator,
     },
+  });
+
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request;
+    if (response instanceof Error) {
+      if (response instanceof ClientError) {
+        return h
+          .response({
+            status: 'fail',
+            message: response.message,
+          })
+          .code(response.statusCode);
+      }
+
+      if (!response.isServer) {
+        return h.continue;
+      }
+
+      return h
+        .response({
+          status: 'fail',
+          message: 'Terjadi kegagalan di server kami',
+        })
+        .code(500);
+    }
+    return h.continue;
   });
 
   await server.start();
