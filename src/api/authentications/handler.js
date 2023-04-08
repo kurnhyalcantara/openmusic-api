@@ -30,6 +30,36 @@ class AuthenticationsHandler {
       })
       .code(201);
   }
+
+  async putAuthenticationsHandler(req) {
+    this._validator.validatePutAuthenticationPayload(req.payload);
+    const { refreshToken } = req.payload;
+
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    const { id } = await this._tokenManager.verifyRefreshToken(refreshToken);
+
+    const accessToken = await this._tokenManager.generateAccessToken({ id });
+
+    return {
+      status: 'success',
+      data: {
+        accessToken,
+      },
+    };
+  }
+
+  async deleteAuthenticationsHandler(req) {
+    this._validator.validateDeleteAuthenticationPayload(req.payload);
+    const { refreshToken } = req.payload;
+
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    await this._authenticationsService.deleteRefreshToken(refreshToken);
+
+    return {
+      status: 'success',
+      message: 'Refresh token berhasil dihapus',
+    };
+  }
 }
 
 module.exports = AuthenticationsHandler;
