@@ -12,7 +12,7 @@ class SongHandler {
       genre,
       performer,
       duration = 0,
-      albumId = '',
+      albumId = 'single',
     } = req.payload;
 
     const songId = await this._services.addSong({
@@ -39,10 +39,7 @@ class SongHandler {
     if (title) {
       const titleSearch = await songs.filter((song) =>
         Object.values(song).some((value) =>
-          value
-            .toString()
-            .toLowerCase()
-            .includes(title.toLowerCase())
+          value.toString().toLowerCase().includes(title.toLowerCase())
         )
       );
       songs = titleSearch;
@@ -50,10 +47,7 @@ class SongHandler {
     if (performer) {
       const performerSearch = await songs.filter((song) =>
         Object.values(song).some((value) =>
-          value
-            .toString()
-            .toLowerCase()
-            .includes(performer.toLowerCase())
+          value.toString().toLowerCase().includes(performer.toLowerCase())
         )
       );
       songs = performerSearch;
