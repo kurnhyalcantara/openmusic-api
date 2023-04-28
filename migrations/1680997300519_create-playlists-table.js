@@ -12,7 +12,7 @@ exports.up = (pgm) => {
     },
     owner: {
       type: 'TEXT',
-      references: '"users"',
+      references: 'users(id)',
       onDelete: 'cascade',
     },
     created_at: {
