@@ -9,7 +9,7 @@ exports.up = (pgm) => {
     playlist_id: {
       type: 'TEXT',
       references: 'playlists(id)',
-      onCascade: true,
+      onDelete: 'cascade',
     },
     song_id: {
       type: 'TEXT',
@@ -19,5 +19,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('playlist-songs');
+  pgm.dropTable('playlist_songs');
 };

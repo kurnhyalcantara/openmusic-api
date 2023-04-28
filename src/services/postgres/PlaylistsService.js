@@ -100,15 +100,10 @@ class PlayListsService {
     };
   }
 
-  async deleteSongInPlaylist(songId) {
-    const queryGetSongInPlaylist = {
-      text: `SELECT songs FROM playlists WHERE songs @> '[{"id": $1 }]'`,
-      values: [songId],
-    };
-    const songs = await this._pool.query(queryGetSongInPlaylist);
+  async deleteSongInPlaylist(songId, playlistId) {
     const query = {
-      text: 'SELECT ARRAY_REMOVE(songs, $1) FROM playlists',
-      values: [songs.rows],
+      text: 'DELETE FROM playlist_songs WHERE song_id = $1 AND playlist_id = $2',
+      values: [songId, playlistId],
     };
 
     await this._pool.query(query);
