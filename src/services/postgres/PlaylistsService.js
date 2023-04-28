@@ -64,46 +64,40 @@ class PlayListsService {
     if (!song) {
       throw new NotFoundError('Gagal menambahkan lagu. Id tidak ditemukan');
     }
-
-    const queryGetSongsInPlaylist = {
-      text: 'SELECT songs FROM playlists WHERE id = $1',
-      values: [playlistId],
-    };
-
-    const resultQueryGetSongsInPlaylist = await this._pool.query(
-      queryGetSongsInPlaylist
-    );
-    const songs = resultQueryGetSongsInPlaylist.rows;
-    // const mapSong = {
-    //   id: song.id,
-    //   title: song.title,
-    //   performer: song.performer,
-    // };
-    // songs.push(JSON.stringify(mapSong));
-    console.log(songs);
-
+    const id = `playlist-song-${nanoid(16)}`;
     const query = {
-      text: `UPDATE playlists SET songs = $1 RETURNING id`,
-      values: [songs],
-    };
-
-    await this._pool.query(query);
-  }
-
-  async getPlaylistWithSongs(playlistId) {
-    const query = {
-      text: 'SELECT playlists.id, playlists.name, playlists.songs, users.username FROM playlists LEFT JOIN users ON users.id = playlists.owner WHERE playlists.id = $1',
-      values: [playlistId],
+      text: 'INSERT INTO playlist_songs VALUES($1, $2, $3) RETURNING id',
+      values: [id, playlistId, songId],
     };
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError(
-        'Gagal menampilkan playlist dengan lagu. Id tidak ditemukan'
-      );
+      throw new InvariantError('Gagal menambahkan lagu ke playlist');
     }
-    console.log(result.rows[0].songs.length);
-    return result.rows[0];
+
+    return result.rows[0].id;
+  }
+
+  async getPlaylistWithSongs(playlistId) {
+    const queryGetPlaylist = {
+      text: 'SELECT playlists.id, playlists.name, users.username FROM playlists INNER JOIN users ON users.id = playlists.owner WHERE playlists.id = $1',
+      values: [playlistId],
+    };
+    const playlist = await this._pool.query(queryGetPlaylist);
+    if (!playlist.rows.length) {
+      throw new NotFoundError('Gagal menampilkan playlist. Id tidak ditemukan');
+    }
+
+    const queryGetSongInPlaylist = {
+      text: 'SELECT songs.id, songs.title, songs.performer FROM songs INNER JOIN playlist_songs ON playlist_songs.song_id = songs.id AND playlist_songs.playlist_id = $1',
+      values: [playlistId],
+    };
+    const songs = await this._pool.query(queryGetSongInPlaylist);
+
+    return {
+      ...playlist.rows[0],
+      songs: songs.rows,
+    };
   }
 
   async deleteSongInPlaylist(songId) {

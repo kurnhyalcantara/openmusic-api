@@ -28,12 +28,13 @@ class PlaylistsHandler {
     const { id: credentialId } = req.auth.credentials;
 
     await this._services.verifyPlaylistOwner(playlistId, credentialId);
-    await this._services.addSongToPlaylist(songId, playlistId);
+    const id = await this._services.addSongToPlaylist(songId, playlistId);
 
     return h
       .response({
         status: 'success',
         message: 'Lagu berhasil ditambahkan ke playlist',
+        playlistSongId: id,
       })
       .code(201);
   }
