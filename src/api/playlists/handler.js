@@ -29,6 +29,12 @@ class PlaylistsHandler {
 
     await this._services.verifyPlaylistAccess(playlistId, credentialId);
     const id = await this._services.addSongToPlaylist(songId, playlistId);
+    await this._services.addPlaylistActivities(
+      playlistId,
+      credentialId,
+      songId,
+      'add'
+    );
 
     return h
       .response({
@@ -66,6 +72,22 @@ class PlaylistsHandler {
     };
   }
 
+  async getPlaylistActivitiesHandler(req) {
+    const { id: playlistId } = req.params;
+    const { id: credentialId } = req.auth.credentials;
+
+    await this._services.verifyPlaylistAccess(playlistId, credentialId);
+    const activities = await this._services.getPlaylistActivities(playlistId);
+
+    return {
+      status: 'success',
+      data: {
+        playlistId,
+        activities,
+      },
+    };
+  }
+
   async deletePlaylistHandler(req) {
     const { id: playlistId } = req.params;
     const { id: credentialId } = req.auth.credentials;
@@ -87,6 +109,12 @@ class PlaylistsHandler {
 
     await this._services.verifyPlaylistAccess(playlistId, credentialId);
     await this._services.deleteSongInPlaylist(songId, playlistId);
+    await this._services.addPlaylistActivities(
+      playlistId,
+      credentialId,
+      songId,
+      'delete'
+    );
 
     return {
       status: 'success',

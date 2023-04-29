@@ -125,6 +125,37 @@ class PlayListsService {
       }
     }
   }
+
+  async addPlaylistActivities(playlistId, userId, songId, action) {
+    const id = `playlist-song-activities-${nanoid(16)}`;
+    const time = new Date().toISOString();
+    const query = {
+      text: 'INSERT INTO playlist_song_activities VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
+      values: [id, playlistId, songId, userId, action, time],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new InvariantError('Playlist activity gagal ditambahkan');
+    }
+
+    return result.rows[0].id;
+  }
+
+  async getPlaylistActivities(playlistId) {
+    const query = {
+      text: 'SELECT users.username, songs.title, ps_act.action, ps_act.time FROM playlist_song_activities as ps_act LEFT JOIN playlists ON playlists.id = ps_act.playlist_id LEFT JOIN playlist_songs as ps ON ps.playlist_id = playlists.id LEFT JOIN songs ON songs.id = ps_act.song_id LEFT JOIN users ON users.id = playlists.owner WHERE playlists.id = $1',
+      values: [playlistId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError(
+        'Playlist activity gagal ditampilkan. Id tidak ditemukan'
+      );
+    }
+
+    return result.rows;
+  }
 }
 
 module.exports = PlayListsService;
