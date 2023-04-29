@@ -130,7 +130,7 @@ const init = async () => {
       return h
         .response({
           status: 'fail',
-          message: `Terjadi kegagalan di server kami. ${response.message}`,
+          message: 'Terjadi kegagalan di server kami.',
         })
         .code(500);
     }
@@ -138,6 +138,7 @@ const init = async () => {
   });
 
   await server.start();
+  // eslint-disable-next-line no-console
   console.log(`Server berjalan pada ${server.info.uri}`);
 };
 
