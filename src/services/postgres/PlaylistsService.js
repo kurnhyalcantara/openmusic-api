@@ -5,9 +5,10 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 const { nanoid } = require('nanoid');
 
 class PlayListsService {
-  constructor(songService) {
+  constructor(songService, collaboratorService) {
     this._pool = new Pool();
     this._songService = songService;
+    this._collaboratorService = collaboratorService;
   }
 
   async addPlaylist(name, owner) {
@@ -25,10 +26,11 @@ class PlayListsService {
 
   async getPlaylists(owner) {
     const query = {
-      text: 'SELECT playlists.id, playlists.name, users.username FROM playlists INNER JOIN users ON users.id = playlists.owner WHERE playlists.owner = $1 ',
+      text: 'SELECT playlists.id, playlists.name, users.username FROM playlists LEFT JOIN users ON users.id = playlists.owner LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id WHERE playlists.owner = $1 OR collaborations.user_id = $1',
       values: [owner],
     };
     const result = await this._pool.query(query);
+    console.log(result.rows);
     return result.rows;
   }
 
@@ -107,6 +109,21 @@ class PlayListsService {
     };
 
     await this._pool.query(query);
+  }
+
+  async verifyPlaylistAccess(playlistId, userId) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaboratorService.verifyCollaborator(playlistId, userId);
+      } catch (error) {
+        throw error;
+      }
+    }
   }
 }
 

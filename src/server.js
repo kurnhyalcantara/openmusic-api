@@ -18,6 +18,9 @@ const Jwt = require('@hapi/jwt');
 const PlayListsService = require('./services/postgres/PlaylistsService');
 const playlists = require('./api/playlists');
 const PlaylistsValidator = require('./validator/playlists');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const collaborations = require('./api/collaborations');
+const CollaborationValidator = require('./validator/collaborations');
 
 const init = async () => {
   const server = await Hapi.server({
@@ -54,7 +57,11 @@ const init = async () => {
   const songService = new SongService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsService = new PlayListsService(songService);
+  const collaborationsService = new CollaborationsService();
+  const playlistsService = new PlayListsService(
+    songService,
+    collaborationsService
+  );
 
   await server.register([
     {
@@ -92,6 +99,14 @@ const init = async () => {
       options: {
         service: playlistsService,
         validator: PlaylistsValidator,
+      },
+    },
+    {
+      plugin: collaborations,
+      options: {
+        playlistsService,
+        collaborationsService,
+        validator: CollaborationValidator,
       },
     },
   ]);
